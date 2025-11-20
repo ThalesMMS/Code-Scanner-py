@@ -334,13 +334,13 @@ process_project() {
             
             # Verifica se o arquivo deve ser ignorado
             if should_ignore_file "$filepath"; then
-                ((++skipped_count))
+                ((skipped_count++))
                 continue
             fi
-            
+
             # Verifica se o caminho deve ser ignorado
             if should_ignore_path "$filepath" "$project_dir"; then
-                ((++skipped_count))
+                ((skipped_count++))
                 continue
             fi
             
@@ -357,7 +357,7 @@ process_project() {
                     echo "└─────────────────────────────────────────────────────────────"
                     echo
                 } >> "$output_file"
-                ((++skipped_count))
+                ((skipped_count++))
                 continue
             fi
             
@@ -379,8 +379,8 @@ process_project() {
                 echo "└─────────────────────────────────────────────────────────────"
                 echo
             } >> "$output_file"
-            
-            ((++file_count))
+
+            ((file_count++))
             total_size=$((total_size + SIZE_BYTES))
         done
     

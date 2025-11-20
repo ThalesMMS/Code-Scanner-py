@@ -3,10 +3,19 @@
 Code Scanner Toolkit provides ready-to-run scripts (Bash and Python) that walk through software projects, extract source files and relevant configuration, and produce concise text bundles you can share or audit. The scripts intentionally ignore hefty build artifacts and secrets, keeping the output focused on the code that matters.
 
 ## Repository Layout
+
+### Enhanced Scanners (NEW!)
+- `scripts/unified_scanner.py` – **Unified Python scanner with auto-detection** of project types, .gitignore support, and custom configuration
+- `scripts/scan_project_enhanced.sh` – **Enhanced Bash scanner** with .gitignore support, project type detection, and improved error handling
+
+### Original Scanners
 - `scripts/scan_project.sh` – main Bash scanner for comprehensive project analysis
+- `scripts/scan_project_windows.sh` – Windows-compatible Bash scanner
 - `scripts/generate_project_summary.py` – Python scanner optimized for web projects (JavaScript/TypeScript/React)
 - `scripts/generate_project_summary_build.py` – Python scanner for build/package projects with binary detection
 - `scripts/generate_project_summary_django.py` – Python scanner for Django/Python backend projects
+
+### Directories
 - `input/` – drop the projects or folders you want to scan; kept in Git via `.gitkeep`
 - `output/` – generated reports (ignored by Git); each project becomes `<name>_project_code.txt` or `<name>_*_summary.txt`
 
@@ -20,15 +29,42 @@ Code Scanner Toolkit provides ready-to-run scripts (Bash and Python) that walk t
 
 ## Quick Start
 
-### Using the Bash Scanner (Comprehensive)
+### Using Enhanced Scanners (RECOMMENDED)
+
+#### Unified Python Scanner (Best for Most Projects)
 ```bash
 git clone <this-repo>
 cd Code-Scanner
 # Add the project(s) you want to review into the input/ directory
+python3 scripts/unified_scanner.py
+```
+
+Features:
+- **Auto-detects project type** (Node.js, Python, Java, Rust, Go, Flutter, etc.)
+- **Respects .gitignore** files automatically
+- **Custom configuration** via `.scanner-config.json` in project root
+- **Smart filtering** of dependencies and build artifacts
+- **Comprehensive language support** (20+ programming languages)
+
+#### Enhanced Bash Scanner
+```bash
+./scripts/scan_project_enhanced.sh
+```
+
+Features:
+- **Project type detection** (Node.js, Python, Django, Java, Rust, Go, etc.)
+- **Optional .gitignore support** (enabled by default)
+- **Verbose mode** for debugging
+- **Better error handling** and progress reporting
+
+### Using Original Scanners
+
+#### Bash Scanner (Comprehensive)
+```bash
 ./scripts/scan_project.sh
 ```
 
-### Using Python Scanners (Specialized)
+#### Python Scanners (Specialized)
 ```bash
 # For web projects (JavaScript/TypeScript/React)
 python3 scripts/generate_project_summary.py
@@ -44,7 +80,47 @@ On first run, the scripts ensure `input/` and `output/` exist. If `input/` is em
 
 ## Customising the Scan
 
-### Bash Scanner (`scan_project.sh`)
+### Enhanced Scanners
+
+#### Unified Python Scanner Configuration
+
+The unified scanner supports custom configuration via `.scanner-config.json` in your project root:
+
+```json
+{
+  "code_extensions": [".py", ".js", ".ts", ".jsx", ".tsx"],
+  "ignore_dirs": ["node_modules", "dist", "build"],
+  "ignore_files": ["*.log", "*.lock"],
+  "ignore_extensions": [".pyc", ".png", ".jpg"],
+  "target_subdirs": ["src", "lib"],
+  "max_file_size": 1048576,
+  "include_hidden": false
+}
+```
+
+See `.scanner-config.example.json` for a full example.
+
+Environment variables:
+```bash
+# Custom input/output directories
+INPUT_DIR=./my-projects OUTPUT_DIR=./my-reports python3 scripts/unified_scanner.py
+```
+
+#### Enhanced Bash Scanner Configuration
+
+Environment variables:
+```bash
+# Disable .gitignore support
+USE_GITIGNORE=false ./scripts/scan_project_enhanced.sh
+
+# Enable verbose mode
+VERBOSE=true ./scripts/scan_project_enhanced.sh
+
+# Custom directories and settings
+TARGET_DIR=./my-project OUTPUT_DIR=./reports MAX_SIZE_BYTES=5242880 ./scripts/scan_project_enhanced.sh
+```
+
+### Original Bash Scanner (`scan_project.sh`)
 The Bash scanner is entirely driven by environment variables, so you can tailor it without editing the source:
 
 | Variable | Purpose | Example |
@@ -102,13 +178,57 @@ Output files for each project contain:
 3. Summaries for each included file with size metadata
 4. Full contents of text-based files (with line numbers for Bash scanner)
 
+## Enhanced Scanner Features
+
+### Auto-Detection of Project Types
+
+The enhanced scanners automatically detect and adapt to the following project types:
+
+| Project Type | Detection Criteria |
+|--------------|-------------------|
+| **Node.js** | `package.json`, `node_modules` |
+| **Python** | `requirements.txt`, `setup.py`, `pyproject.toml`, `Pipfile` |
+| **Django** | `manage.py`, `settings.py`, `wsgi.py` |
+| **React** | `package.json` + React components in `src/` |
+| **Next.js** | `next.config.js`, `pages/`, `app/` |
+| **Vue** | `vue.config.js`, `src/App.vue` |
+| **Angular** | `angular.json`, `src/app` |
+| **Java (Maven)** | `pom.xml`, `mvnw` |
+| **Java (Gradle)** | `build.gradle`, `gradlew` |
+| **Spring Boot** | `pom.xml` + `application.properties/yml` |
+| **Rust** | `Cargo.toml`, `Cargo.lock` |
+| **Go** | `go.mod`, `go.sum` |
+| **.NET** | `.csproj`, `.sln` files |
+| **PHP/Laravel** | `composer.json`, `artisan` |
+| **Ruby/Rails** | `Gemfile`, `Rakefile` |
+| **Flutter** | `pubspec.yaml`, `lib/main.dart` |
+| **Docker** | `Dockerfile`, `docker-compose.yml` |
+
+### Smart Filtering
+
+Enhanced scanners automatically ignore:
+- **Dependencies**: `node_modules`, `vendor`, `Pods`, etc.
+- **Build artifacts**: `dist`, `build`, `target`, `out`, etc.
+- **Cache directories**: `.cache`, `__pycache__`, `.gradle`, etc.
+- **IDE files**: `.vscode`, `.idea`, `.DS_Store`, etc.
+- **Sensitive files**: `.env*`, `*.key`, `*.pem`, etc.
+- **Large binaries**: Files exceeding configurable size limit
+- **.gitignore patterns**: Respects project's .gitignore (optional)
+
+### Supported Languages (20+)
+
+Python, JavaScript, TypeScript, Java, Kotlin, Rust, Go, C, C++, C#, F#, Swift, Objective-C, Dart, Ruby, PHP, HTML, CSS, SCSS, Markdown, JSON, YAML, XML, TOML, Shell scripts, and more.
+
 ## Tips
-- **Choose the right scanner**: Use specialized Python scanners for faster, more focused results on specific project types
+- **Use enhanced scanners first**: They provide the best balance of features and ease of use
+- **Customize with .scanner-config.json**: Place in project root for project-specific settings
 - Use `IGNORE_FILES_EXTRA` and `IGNORE_DIRS_EXTRA` (Bash) to keep noisy artefacts out of reports
 - Large binary files are automatically skipped by all scanners
 - If you only need a single project, place it directly in `input/` or point `TARGET_DIR`/`INPUT_DIR` to it
-- Python scanners generate output files with type suffixes: `*_web_summary.txt`, `*_build_summary.txt`, `*_django_summary.txt`
+- Enhanced scanners output files with `*_unified_scan.txt` or `*_enhanced_scan.txt` suffix
+- Original Python scanners generate: `*_web_summary.txt`, `*_build_summary.txt`, `*_django_summary.txt`
 - All scanners automatically create `input/` and `output/` directories if they don't exist
+- Use `VERBOSE=true` with enhanced Bash scanner to debug filtering issues
 
 ## Licensing
 This project is released under the MIT License; see `LICENSE` for full details.
