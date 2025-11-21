@@ -16,3 +16,5 @@ Thumbs.db
 *.tmp
 *.swp
 /input
+/scripts/scanner/__pycache__
+/scripts/__pycache__
